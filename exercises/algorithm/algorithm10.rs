@@ -1,6 +1,6 @@
 /*
-	graph
-	This problem requires you to implement a basic graph functio
+    graph
+    This problem requires you to implement a basic graph functio
 */
 use std::collections::{HashMap, HashSet};
 use std::fmt;
@@ -30,8 +30,14 @@ impl Graph for UndirectedGraph {
         let (from, to, weight) = edge;
         self.add_node(from);
         self.add_node(to);
-        self.adjacency_table_mutable().get_mut(from).unwrap().push((to.to_string(), weight));
-        self.adjacency_table_mutable().get_mut(to).unwrap().push((from.to_string(), weight));
+        self.adjacency_table_mutable()
+            .get_mut(from)
+            .unwrap()
+            .push((to.to_string(), weight));
+        self.adjacency_table_mutable()
+            .get_mut(to)
+            .unwrap()
+            .push((from.to_string(), weight));
     }
 }
 pub trait Graph {
@@ -51,7 +57,10 @@ pub trait Graph {
         let (from, to, weight) = edge;
         self.add_node(from);
         self.add_node(to);
-        self.adjacency_table_mutable().get_mut(from).unwrap().push((to.to_string(), weight));
+        self.adjacency_table_mutable()
+            .get_mut(from)
+            .unwrap()
+            .push((to.to_string(), weight));
     }
     fn contains(&self, node: &str) -> bool {
         self.adjacency_table().get(node).is_some()
@@ -90,5 +99,23 @@ mod test_undirected_graph {
         for edge in expected_edges.iter() {
             assert_eq!(graph.edges().contains(edge), true);
         }
+    }
+}
+#[cfg(test)]
+mod edge_case_tests {
+    use super::*;
+
+    #[test]
+    fn add_node_preserves_existing_edges() {
+        let mut graph = UndirectedGraph::new();
+        assert!(graph.add_node("a"));
+        assert!(!graph.add_node("a"));
+        assert!(graph.contains("a"));
+        assert!(!graph.contains("b"));
+        graph.add_edge(("a", "b", -3));
+        assert!(!graph.add_node("a"));
+        assert_eq!(graph.nodes().len(), 2);
+        assert_eq!(graph.edges().len(), 2);
+        assert_eq!(graph.adjacency_table()["a"], [(String::from("b"), -3)]);
     }
 }

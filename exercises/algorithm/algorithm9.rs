@@ -1,6 +1,6 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
 use std::cmp::Ord;
 use std::default::Default;
@@ -176,5 +176,32 @@ mod tests {
         assert_eq!(heap.next(), Some(4));
         heap.add(1);
         assert_eq!(heap.next(), Some(2));
+    }
+}
+#[cfg(test)]
+mod edge_case_tests {
+    use super::*;
+
+    #[test]
+    fn heap_drains_duplicates_and_can_be_reused() {
+        let mut heap = Heap::new_min();
+        for value in [0, -1, 2, 2, -1] {
+            heap.add(value);
+        }
+        assert_eq!(heap.by_ref().collect::<Vec<_>>(), [-1, -1, 0, 2, 2]);
+        assert!(heap.is_empty());
+        assert_eq!(heap.next(), None);
+        heap.add(3);
+        assert_eq!(heap.next(), Some(3));
+        assert_eq!(heap.next(), None);
+    }
+
+    #[test]
+    fn heap_supports_custom_comparator_and_owned_values() {
+        let mut heap = Heap::new(|a: &String, b: &String| a.len() < b.len());
+        for word in ["dddd", "a", "ccc", "bb"] {
+            heap.add(word.to_string());
+        }
+        assert_eq!(heap.collect::<Vec<_>>(), ["a", "bb", "ccc", "dddd"]);
     }
 }

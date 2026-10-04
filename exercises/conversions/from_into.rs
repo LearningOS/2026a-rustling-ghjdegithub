@@ -47,7 +47,10 @@ impl From<&str> for Person {
             return Person::default();
         }
         match fields[1].parse() {
-            Ok(age) => Person { name: fields[0].to_string(), age },
+            Ok(age) => Person {
+                name: fields[0].to_string(),
+                age,
+            },
             Err(_) => Person::default(),
         }
     }

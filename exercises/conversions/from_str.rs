@@ -61,7 +61,10 @@ impl FromStr for Person {
             return Err(ParsePersonError::NoName);
         }
         let age = fields[1].parse().map_err(ParsePersonError::ParseInt)?;
-        Ok(Person { name: fields[0].to_string(), age })
+        Ok(Person {
+            name: fields[0].to_string(),
+            age,
+        })
     }
 }
 

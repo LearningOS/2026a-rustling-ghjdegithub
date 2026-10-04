@@ -1,6 +1,6 @@
 /*
-	single linked list merge
-	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
+    single linked list merge
+    This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -14,10 +14,7 @@ struct Node<T> {
 
 impl<T> Node<T> {
     fn new(t: T) -> Node<T> {
-        Node {
-            val: t,
-            next: None,
-        }
+        Node { val: t, next: None }
     }
 }
 #[derive(Debug)]
@@ -75,11 +72,13 @@ impl<T> LinkedList<T> {
         while list_a.start.is_some() || list_b.start.is_some() {
             let source = match (list_a.start, list_b.start) {
                 // SAFETY: Both pointers refer to live nodes owned by their lists.
-                (Some(a), Some(b)) => if unsafe { a.as_ref().val <= b.as_ref().val } {
-                    &mut list_a
-                } else {
-                    &mut list_b
-                },
+                (Some(a), Some(b)) => {
+                    if unsafe { a.as_ref().val <= b.as_ref().val } {
+                        &mut list_a
+                    } else {
+                        &mut list_b
+                    }
+                }
                 (Some(_), None) => &mut list_a,
                 (None, Some(_)) => &mut list_b,
                 (None, None) => break,
@@ -168,44 +167,78 @@ mod tests {
 
     #[test]
     fn test_merge_linked_list_1() {
-		let mut list_a = LinkedList::<i32>::new();
-		let mut list_b = LinkedList::<i32>::new();
-		let vec_a = vec![1,3,5,7];
-		let vec_b = vec![2,4,6,8];
-		let target_vec = vec![1,2,3,4,5,6,7,8];
-		
-		for i in 0..vec_a.len(){
-			list_a.add(vec_a[i]);
-		}
-		for i in 0..vec_b.len(){
-			list_b.add(vec_b[i]);
-		}
-		println!("list a {} list b {}", list_a,list_b);
-		let mut list_c = LinkedList::<i32>::merge(list_a,list_b);
-		println!("merged List is {}", list_c);
-		for i in 0..target_vec.len(){
-			assert_eq!(target_vec[i],*list_c.get(i as i32).unwrap());
-		}
-	}
-	#[test]
-	fn test_merge_linked_list_2() {
-		let mut list_a = LinkedList::<i32>::new();
-		let mut list_b = LinkedList::<i32>::new();
-		let vec_a = vec![11,33,44,88,89,90,100];
-		let vec_b = vec![1,22,30,45];
-		let target_vec = vec![1,11,22,30,33,44,45,88,89,90,100];
+        let mut list_a = LinkedList::<i32>::new();
+        let mut list_b = LinkedList::<i32>::new();
+        let vec_a = vec![1, 3, 5, 7];
+        let vec_b = vec![2, 4, 6, 8];
+        let target_vec = vec![1, 2, 3, 4, 5, 6, 7, 8];
 
-		for i in 0..vec_a.len(){
-			list_a.add(vec_a[i]);
-		}
-		for i in 0..vec_b.len(){
-			list_b.add(vec_b[i]);
-		}
-		println!("list a {} list b {}", list_a,list_b);
-		let mut list_c = LinkedList::<i32>::merge(list_a,list_b);
-		println!("merged List is {}", list_c);
-		for i in 0..target_vec.len(){
-			assert_eq!(target_vec[i],*list_c.get(i as i32).unwrap());
-		}
-	}
+        for i in 0..vec_a.len() {
+            list_a.add(vec_a[i]);
+        }
+        for i in 0..vec_b.len() {
+            list_b.add(vec_b[i]);
+        }
+        println!("list a {} list b {}", list_a, list_b);
+        let mut list_c = LinkedList::<i32>::merge(list_a, list_b);
+        println!("merged List is {}", list_c);
+        for i in 0..target_vec.len() {
+            assert_eq!(target_vec[i], *list_c.get(i as i32).unwrap());
+        }
+    }
+    #[test]
+    fn test_merge_linked_list_2() {
+        let mut list_a = LinkedList::<i32>::new();
+        let mut list_b = LinkedList::<i32>::new();
+        let vec_a = vec![11, 33, 44, 88, 89, 90, 100];
+        let vec_b = vec![1, 22, 30, 45];
+        let target_vec = vec![1, 11, 22, 30, 33, 44, 45, 88, 89, 90, 100];
+
+        for i in 0..vec_a.len() {
+            list_a.add(vec_a[i]);
+        }
+        for i in 0..vec_b.len() {
+            list_b.add(vec_b[i]);
+        }
+        println!("list a {} list b {}", list_a, list_b);
+        let mut list_c = LinkedList::<i32>::merge(list_a, list_b);
+        println!("merged List is {}", list_c);
+        for i in 0..target_vec.len() {
+            assert_eq!(target_vec[i], *list_c.get(i as i32).unwrap());
+        }
+    }
+}
+#[cfg(test)]
+mod edge_case_tests {
+    use super::*;
+
+    #[test]
+    fn merge_empty_and_non_copy_lists() {
+        let mut empty = LinkedList::<String>::merge(LinkedList::new(), LinkedList::new());
+        assert_eq!(empty.length, 0);
+        assert_eq!(empty.get(0), None);
+        let mut list = LinkedList::new();
+        list.add(String::from("a"));
+        list.add(String::from("a"));
+        let mut merged = LinkedList::merge(LinkedList::new(), list);
+        merged.add(String::from("b"));
+        assert_eq!(merged.length, 3);
+        assert_eq!(merged.to_string(), "a, a, b");
+        assert_eq!(merged.get(3), None);
+        let mut merged = LinkedList::merge(merged, LinkedList::new());
+        assert_eq!(merged.get(2).map(String::as_str), Some("b"));
+    }
+
+    #[test]
+    fn merged_nodes_are_released_once() {
+        let value = std::rc::Rc::new(1);
+        let mut left = LinkedList::new();
+        let mut right = LinkedList::new();
+        left.add(std::rc::Rc::clone(&value));
+        right.add(std::rc::Rc::clone(&value));
+        let merged = LinkedList::merge(left, right);
+        assert_eq!(std::rc::Rc::strong_count(&value), 3);
+        drop(merged);
+        assert_eq!(std::rc::Rc::strong_count(&value), 1);
+    }
 }

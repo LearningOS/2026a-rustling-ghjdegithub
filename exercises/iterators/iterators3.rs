@@ -27,7 +27,10 @@ pub fn divide(a: i32, b: i32) -> Result<i32, DivisionError> {
     if b == 0 {
         Err(DivisionError::DivideByZero)
     } else if a % b != 0 {
-        Err(DivisionError::NotDivisible(NotDivisibleError { dividend: a, divisor: b }))
+        Err(DivisionError::NotDivisible(NotDivisibleError {
+            dividend: a,
+            divisor: b,
+        }))
     } else {
         Ok(a / b)
     }
